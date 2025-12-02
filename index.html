@@ -5,24 +5,63 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jinghuei Portfolio</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
     body {
-      font-family: Arial, sans-serif;
-      padding: 40px;
-      line-height: 1.8;
-      background: #f7f7f7;
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background: #f3f4f6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card {
+      background: #ffffff;
+      padding: 40px 48px;
+      border-radius: 16px;
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.15);
+      max-width: 640px;
+      width: 90%;
     }
     h1 {
+      margin: 0 0 12px;
       font-size: 32px;
-      margin-bottom: 10px;
+      color: #111827;
+    }
+    h2 {
+      margin: 24px 0 8px;
+      font-size: 20px;
+      color: #111827;
     }
     p {
-      font-size: 18px;
+      margin: 4px 0;
+      color: #4b5563;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+    .tag {
+      display: inline-block;
+      padding: 2px 10px;
+      font-size: 12px;
+      border-radius: 999px;
+      background: #e0f2fe;
+      color: #0369a1;
+      margin-bottom: 12px;
     }
   </style>
 </head>
 <body>
-  <h1>Hello, I'm Jinghuei 👋</h1>
-  <p>My portfolio website is now online.</p>
-  <p>接下來會慢慢把 UI/UX 作品放上來～</p>
+  <div class="card">
+    <div class="tag">UI/UX Portfolio – Draft</div>
+    <h1>Hello, I'm Jinghuei 👋</h1>
+    <p>這是我的 GitHub Pages 首頁，之後會放上 UI/UX & 前端互動的作品集。</p>
+
+    <h2>目前進度</h2>
+    <p>✅ GitHub Pages 已啟用</p>
+    <p>✅ 成功建立 index.html</p>
+    <p>⬜ 接下來會把完整作品集頁面放上來</p>
+  </div>
 </body>
 </html>
