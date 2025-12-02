@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Case – 複雜 Flow × PRD 拆解</title>
-  <link rel="stylesheet" href="../styles/main.css" />
+  <title>Jinghuei – UI/UX Portfolio</title>
+  <link rel="stylesheet" href="styles/main.css" />
 </head>
 <body>
   <header class="site-header">
@@ -13,42 +13,127 @@
         <span class="logo-mark">JH</span>
         <span class="logo-text">Jinghuei / UI·UX</span>
       </div>
+      <nav class="nav">
+        <a href="#about">About</a>
+        <a href="#cases">Cases</a>
+        <a href="#skills">Skills</a>
+        <a href="#contact">Contact</a>
+      </nav>
     </div>
   </header>
 
-  <main class="case-layout">
-    <div class="container">
-      <a href="../index.html" class="back-link">← Back to Home</a>
+  <main>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="container hero-inner">
+        <div class="hero-text">
+          <p class="hero-tag">UI/UX Designer · Product Thinking</p>
+          <h1>Turning complex systems<br>into clear, usable experiences.</h1>
+          <p class="hero-sub">
+            心理學背景的 UI/UX 設計師，擅長拆解複雜需求、規劃流程與後台介面，並與工程協作落地。
+          </p>
+          <div class="hero-actions">
+            <a href="#cases" class="btn primary">View Case Studies</a>
+            <a href="#contact" class="btn ghost">Contact</a>
+          </div>
+        </div>
+      </div>
+    </section>
 
-      <h1>複雜 Flow × PRD 拆解</h1>
-      <p class="case-meta">Role：Product / UX · Type：多步驟流程設計與規格文件</p>
+    <!-- About -->
+    <section id="about" class="section">
+      <div class="container">
+        <h2 class="section-title">About</h2>
+        <p>
+          畢業於臺大心理系，曾任出版企畫與軟體公司助理工程師。現主要負責
+          <strong>UI/UX 設計、系統流程規劃、後台介面、三維互動 Demo 與設計驗證</strong>。
+        </p>
+        <p>
+          喜歡將抽象需求轉成具體的使用者流程與介面規格，並在與 PO、工程師協作中，把產品慢慢推向更清楚、好維護的狀態。
+        </p>
+      </div>
+    </section>
 
-      <h2 class="case-section-title">問題與情境</h2>
-      <p>（描述原本流程混亂、例外很多、溝通困難的狀況。）</p>
+    <!-- Case Studies -->
+    <section id="cases" class="section section-alt">
+      <div class="container">
+        <h2 class="section-title">Case Studies</h2>
 
-      <h2 class="case-section-title">分析步驟</h2>
-      <ul>
-        <li>盤點角色與情境（User / Admin / 教官 等）</li>
-        <li>拆解任務與成功條件</li>
-        <li>整理各種例外與錯誤情形</li>
-        <li>與 PO / 工程對齊資料與流程邏輯</li>
-      </ul>
+        <div class="case-list">
+          <article class="case-card">
+            <p class="case-tag">SaaS · Dashboard</p>
+            <h3>後台 Dashboard 系統重構</h3>
+            <p class="case-desc">
+              整理複雜權限與多模組資料，重設資訊架構與使用流程，建立可維護的 Design System 與 Design Spec。
+            </p>
+            <a href="views/case-dashboard.html" class="case-link">View case →</a>
+          </article>
 
           <article class="case-card">
             <p class="case-tag">3D · Interaction</p>
-            <h3>3D Dog Interaction Demo｜狗狗行為樹 × 使用者互動設計</h3>
+            <h3>三維互動介面與操作流程</h3>
             <p class="case-desc">
               與工程協作 Three.js / WebXR，規劃 3D 場景內的控制面板與操作動線，兼顧效能與可用性。
             </p>
             <a href="views/case-3d.html" class="case-link">View case →</a>
           </article>
 
-      <h2 class="case-section-title">PRD / Spec</h2>
-      <p>（說明你怎麼把流程轉成欄位、API、畫面狀態、規格。）</p>
+          <article class="case-card">
+            <p class="case-tag">Flow · PRD</p>
+            <h3>複雜功能 Flow × PRD 拆解</h3>
+            <p class="case-desc">
+              從使用情境出發拆解需求，規劃多步驟流程與例外狀況，撰寫工程可直接實作的規格文件。
+            </p>
+            <a href="views/case-flow.html" class="case-link">View case →</a>
+          </article>
+        </div>
+      </div>
+    </section>
 
-      <h2 class="case-section-title">Impact / 成效</h2>
-      <p>（流程清楚、溝通時間縮短、開發修改次數下降等。）</p>
-    </div>
+    <!-- Skills -->
+    <section id="skills" class="section">
+      <div class="container">
+        <h2 class="section-title">Skills</h2>
+        <div class="skills-grid">
+          <div class="skill-block">
+            <h3>Product & UX</h3>
+            <ul>
+              <li>需求拆解、User Flow、Wireflow</li>
+              <li>資訊架構、後台 / Dashboard 規劃</li>
+              <li>PRD 與功能規格撰寫</li>
+              <li>Usability review、流程驗證</li>
+            </ul>
+          </div>
+          <div class="skill-block">
+            <h3>UI & Interaction</h3>
+            <ul>
+              <li>Wireframe / Prototype（Figma）</li>
+              <li>Design System / Components</li>
+              <li>狀態設計與錯誤處理</li>
+              <li>Responsive Web</li>
+            </ul>
+          </div>
+          <div class="skill-block">
+            <h3>Dev Collaboration</h3>
+            <ul>
+              <li>HTML / CSS / JavaScript</li>
+              <li>Three.js / WebXR（基礎協作）</li>
+              <li>API / Data flow 溝通</li>
+              <li>Design QA 與跨部門協作</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact" class="section section-alt">
+      <div class="container">
+        <h2 class="section-title">Contact</h2>
+        <p>如果對我的經驗或作品有興趣，很歡迎與我聯繫。</p>
+        <p>Email：<a href="mailto:b04207009@gmail.com">b04207009@gmail.com</a></p>
+      </div>
+    </section>
   </main>
 
   <footer class="site-footer">
@@ -57,6 +142,6 @@
     </div>
   </footer>
 
-  <script src="../src/main.js" defer></script>
+  <script src="src/main.js" defer></script>
 </body>
 </html>
