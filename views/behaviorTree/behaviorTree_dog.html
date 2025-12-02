@@ -1,0 +1,106 @@
+<html lang="en">
+
+<head>
+  <title>Meadow Fetch Time</title>
+  <meta charset="utf-8">
+  <link rel="icon" type="image/png" href="media/icon.png">
+
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <link rel="stylesheet" href="/styles/bootstrap.min.css" />
+  <link rel="stylesheet" href="/node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+  <link rel="stylesheet" href="../../styles/behaviorTree_dog.css">
+</head>
+
+<body>
+  <audio id="bgMusic" src="/media/audio/game_bgm.mp3" loop></audio>
+  <audio id="sfxThrow" src="/media/audio/sfx_throw.mp3" preload="auto"></audio>
+  <audio id="sfxBark1" src="/media/audio/sfx_bark.mp3" preload="auto"></audio>
+  <audio id="sfxBark2" src="/media/audio/sfx_bark_1.mp3" preload="auto"></audio>
+  <audio id="sfxBark3" src="/media/audio/sfx_bark_2.mp3" preload="auto"></audio>
+
+
+  <div class="background"></div>
+  <!-- 初始 -->
+
+  <div class="loadingContainer play-button-scale"
+    style="height: 210px; width: 210px; box-shadow: rgba(255, 255, 255, 0.6) 0px 0px 10px 10px; background-color: rgb(255, 255, 255); cursor: pointer;">
+    <svg class="loadingBarContainer" xmlns="http://www.w3.org/2000/svg" version="1.1" width="160px" height="160px">
+      <circle class="loadingBar" cx="80" cy="80" r="35.5" stroke-linecap="round"
+        style="stroke-width: 70px; stroke-dashoffset: 0px; display: none;"></circle>
+    </svg>
+    <div class="exploreTextContainer" style="opacity: 1;">
+      <p class="exploreText play-text">PLAY</p>
+    </div>
+  </div>
+  <div class="loadingScreen">
+    <div class="exploreNoAudio" style="opacity: 1;"><i class="fa-solid fa-headphones"></i>　Play With Audio</div>
+    <div class="loadingTextContainer">
+      <p class="loadingTextItem" style="opacity: 1;">Hold left / right mouse button to charge,<br>release to throw the
+        ball. </p>
+    </div>
+  </div>
+  <div class="loadingScreen loadingScreen_img"></div>
+
+  <!-- control -->
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="ms-nav-container">
+          <ul class="ms-nav" id="ballTypePanel">
+            <input type="checkbox" id="ms-menu" class="ms-menu-toggle" name="ms-menu-toggle" />
+            <li class="ms-li ms-li3 ms-li-last ball-type-btn active" data-ball-type="tennisball">
+              <a href="javascript:void(0)">
+                <span class="fa-solid fa-baseball"></span>
+              </a>
+            </li>
+            <li class="ms-li ms-li2 ball-type-btn" data-ball-type="football">
+              <a href="javascript:void(0)">
+                <span class="fa-solid fa-futbol"></span>
+              </a>
+            </li>
+            <li class="ms-li ms-li1 ms-li-first ball-type-btn" data-ball-type="beachball">
+              <a href="javascript:void(0)">
+                <span class="fa-solid fa-volleyball"></span>
+              </a>
+            </li>
+            <li class="ms-main">
+              <a href="javascript:void(0)">
+                <label class="ms-menu-toggle-lbl" for="ms-menu">
+                  <span class="fa-solid fa-shapes"></span>
+                </label>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="container"></div>
+  <!-- 霧覆蓋層 -->
+  <div id="fog-overlay"></div>
+
+  <div id="logo-overlay">
+    <div class="fog-center-logo">Meadow Fetch Time</div>
+  </div>
+
+  <!-- 蓄力 -->
+  <div id="chargeHUD">
+    <div id="chargeFill"></div>
+  </div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "../../../node_modules/three/build/three.module.js",
+      "three/addons/": "../../../node_modules/three/examples/jsm/",
+      "cannon-es": "../../../node_modules/cannon-es/dist/cannon-es.js"
+    }
+  }
+  </script>
+  <script src="../../node_modules/three/examples/jsm/libs/ammo.wasm.js"></script>
+  <script type="module" src="../../src/behaviorTree_dog.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NPC行為樹模擬器 (完整心理學版)</title>
+  <style>
+    /* ====== 基礎樣式 ====== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #2d3748;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, .1);
+      display: flex;
+      flex-direction: column;
+      /* 關鍵修正：移除 overflow: hidden 避免內容被卡掉 */
+    }
+
+    .header {
+      background: #2d3748;
+      color: #fff;
+      padding: 24px;
+      text-align: center;
+      border-radius: 20px 20px 0 0;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      opacity: 0.8;
+      font-size: 14px;
+    }
+
+    .main-content {
+      display: grid;
+      grid-template-columns: 300px 1fr 300px;
+      gap: 24px;
+      padding: 24px;
+      background: #f8fafc;
+    }
+
+    /* 面板共同樣式 */
+    .personality-panel,
+    .commands-panel {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      height: fit-content;
+    }
+
+    .panel-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #1a202c;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #edf2f7;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ====== 中間角色區 ====== */
+    .character-area {
+      background: linear-gradient(180deg, #2d3748 0%, #1a202c 100%);
+      border-radius: 16px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
+      color: #fff;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+      /* min-height: 500px; */
+      height: 69vh;
+    }
+
+    .character {
+      width: 140px;
+      height: 140px;
+      background: linear-gradient(135deg, #63b3ed, #4299e1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, .4);
+      transition: all .3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      margin-bottom: 24px;
+      border: 4px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* 情緒動畫狀態 */
+    .character.happy {
+      background: linear-gradient(135deg, #68d391, #48bb78);
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    .character.angry {
+      background: linear-gradient(135deg, #fc8181, #f56565);
+      transform: scale(1.1) rotate(-5deg);
+      animation: shake .5s ease-in-out;
+    }
+
+    .character.sad {
+      background: linear-gradient(135deg, #90cdf4, #63b3ed);
+      transform: scale(.95);
+      filter: grayscale(0.5);
+    }
+
+    .character.fearful {
+      background: linear-gradient(135deg, #b794f4, #9f7aea);
+      transform: scale(.9) translateY(10px);
+      animation: tremble .2s infinite;
+    }
+
+    @keyframes shake {
+
+      0%,
+      100% {
+        transform: scale(1.1) rotate(-5deg);
+      }
+
+      50% {
+        transform: scale(1.1) rotate(5deg);
+      }
+    }
+
+    @keyframes tremble {
+
+      0%,
+      100% {
+        transform: scale(.9) translateY(10px) translateX(-1px);
+      }
+
+      50% {
+        transform: scale(.9) translateY(10px) translateX(1px);
+      }
+    }
+
+    .status-display {
+      text-align: center;
+      padding: 15px;
+      background: rgba(255, 255, 255, .1);
+      backdrop-filter: blur(5px);
+      border-radius: 12px;
+      width: 100%;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* ====== Log 區域 ====== */
+    .log-area {
+      background: rgba(0, 0, 0, 0.3);
+      color: #a0aec0;
+      border-radius: 8px;
+      padding: 12px;
+      width: 100%;
+      flex: 1;
+      overflow-y: auto;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .log-entry {
+      margin-bottom: 6px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      animation: slideIn 0.3s ease;
+      line-height: 1.4;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .log-entry.action {
+      color: #68d391;
+      border-left: 2px solid #68d391;
+      background: rgba(104, 211, 145, 0.1);
+    }
+
+    .log-entry.emotion {
+      color: #d6bcfa;
+      border-left: 2px solid #d6bcfa;
+      background: rgba(183, 148, 244, 0.1);
+    }
+
+    .log-entry.decision {
+      color: #63b3ed;
+      border-left: 2px solid #63b3ed;
+      background: rgba(99, 179, 237, 0.1);
+    }
+
+    /* ====== 滑桿與按鈕 ====== */
+    .trait-slider {
+      margin-bottom: 15px;
+    }
+
+    .trait-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #718096;
+    }
+
+    .slider {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #edf2f7;
+      outline: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+    }
+
+    .slider::-webkit-slider-thumb {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #4299e1;
+      transition: transform .2s;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .slider::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    .command-btn {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 8px;
+      border: none;
+      border-radius: 8px;
+      background: #fff;
+      color: #4a5568;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .command-btn:hover {
+      background: #ebf8ff;
+      border-color: #bee3f8;
+      color: #2b6cb0;
+      transform: translateX(2px);
+    }
+
+    .command-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* ====== 行為樹面板 (重點優化) ====== */
+    .bt-panel {
+      padding: 0 24px 24px 24px;
+      background: #f8fafc;
+      border-radius: 0 0 20px 20px;
+    }
+
+    .bt-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .bt-toolbar {
+      display: flex;
+      gap: 10px;
+    }
+
+    .bt-btn {
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid #cbd5e0;
+      background: #fff;
+      color: #4a5568;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .bt-btn:hover {
+      background: #edf2f7;
+    }
+
+    /* 關鍵修正：允許捲動，避免卡掉 */
+    .bt-wrap {
+      background-color: #1a202c;
+      background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+      background-size: 20px 20px;
+      border: 1px solid #2d3748;
+      border-radius: 12px;
+      width: 100%;
+      height: 500px;
+      overflow: auto;
+      /* 顯示捲軸 */
+      position: relative;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+    }
+
+    svg.bt {
+      display: block;
+      min-width: 100%;
+      min-height: 100%;
+    }
+
+    .node rect {
+      rx: 6;
+      ry: 6;
+      stroke: #4a5568;
+      stroke-width: 1.5;
+      fill: #2d3748;
+      filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
+    }
+
+    .node text {
+      font-size: 12px;
+      fill: #cbd5e0;
+      font-weight: 500;
+      pointer-events: none;
+    }
+
+    /* 節點顏色 */
+    .node.selector rect {
+      stroke: #d69e2e;
+      fill: #2d3748;
+    }
+
+    .node.sequence rect {
+      stroke: #38a169;
+      fill: #2d3748;
+    }
+
+    .node.condition rect {
+      stroke: #3182ce;
+      fill: #232d3f;
+      stroke-dasharray: 4;
+    }
+
+    .node.action rect {
+      stroke: #805ad5;
+      fill: #2d3748;
+    }
+
+    /* 狀態 */
+    .node.success rect {
+      stroke: #48bb78;
+      stroke-width: 3;
+      fill: rgba(72, 187, 120, 0.2);
+    }
+
+    .node.failure rect {
+      stroke: #f56565;
+      stroke-width: 3;
+      fill: rgba(245, 101, 101, 0.2);
+    }
+
+    .link {
+      stroke: #718096;
+      stroke-width: 1.5;
+      fill: none;
+      transition: all 0.3s;
+    }
+
+    .link.active {
+      stroke: #48bb78;
+      stroke-width: 2.5;
+      filter: drop-shadow(0 0 3px #48bb78);
+    }
+
+    .legend {
+      position: sticky;
+      bottom: 12px;
+      right: 12px;
+      float: right;
+      background: rgba(26, 32, 44, 0.9);
+      border: 1px solid #4a5568;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 11px;
+      color: #a0aec0;
+      z-index: 10;
+      margin-top: -40px;
+      margin-right: 12px;
+    }
+
+    /* ====== 記憶標籤樣式 ====== */
+    .memory-item {
+      padding: 4px 8px;
+      margin-bottom: 4px;
+      border-radius: 4px;
+      background: #edf2f7;
+      border-left: 3px solid #cbd5e0;
+      animation: slideIn 0.3s ease;
+    }
+
+    .memory-item.negative {
+      background: #fff5f5;
+      border-left-color: #f56565;
+      /* 紅色：負面記憶 */
+      color: #c53030;
+    }
+
+    .memory-item.positive {
+      background: #f0fff4;
+      border-left-color: #48bb78;
+      /* 綠色：正面記憶 */
+      color: #2f855a;
+    }
+
+    /* RWD */
+    @media (max-width: 1024px) {
+      .main-content {
+        grid-template-columns: 1fr;
+      }
+
+      .character-area {
+        order: -1;
+        min-height: 400px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🤖 NPC 行為樹模擬器</h1>
+      <p>基於五大性格特質 (Big Five) 與行為樹 (Behavior Tree) 的動態決策系統</p>
+    </div>
+
+    <div class="main-content">
+      <div class="personality-panel">
+        <div class="panel-title">🧠 人格特質 (Big Five)</div>
+        <div class="trait-slider">
+          <div class="trait-label"><span>開放性 (Openness)</span><span id="openness-value">0.5</span></div>
+          <input type="range" min="0" max="1" step="0.1" value="0.5" class="slider" id="openness">
+        </div>
+        <div class="trait-slider">
+          <div class="trait-label"><span>盡責性 (Conscientiousness)</span><span id="conscientiousness-value">0.5</span>
+          </div>
+          <input type="range" min="0" max="1" step="0.1" value="0.5" class="slider" id="conscientiousness">
+        </div>
+        <div class="trait-slider">
+          <div class="trait-label"><span>外向性 (Extraversion)</span><span id="extraversion-value">0.5</span></div>
+          <input type="range" min="0" max="1" step="0.1" value="0.5" class="slider" id="extraversion">
+        </div>
+        <div class="trait-slider">
+          <div class="trait-label"><span>宜人性 (Agreeableness)</span><span id="agreeableness-value">0.5</span></div>
+          <input type="range" min="0" max="1" step="0.1" value="0.5" class="slider" id="agreeableness">
+        </div>
+        <div class="trait-slider">
+          <div class="trait-label"><span>神經質 (Neuroticism)</span><span id="neuroticism-value">0.5</span></div>
+          <input type="range" min="0" max="1" step="0.1" value="0.5" class="slider" id="neuroticism">
+        </div>
+
+        <div style="margin-top: 20px; padding-top:15px; border-top: 1px dashed #e2e8f0;">
+          <div class="trait-label"><span>🤝 對玩家信任度</span><span id="trust-value">0.50</span></div>
+          <div style="height: 8px; background: #edf2f7; border-radius: 4px; overflow: hidden;">
+            <div id="trust-bar" style="width: 50%; height: 100%; background: #48bb78; transition: width 0.3s;"></div>
+          </div>
+        </div>
+
+        <div style="margin-top: 20px; padding-top:15px; border-top: 1px dashed #e2e8f0;">
+          <div class="panel-title" style="font-size:14px; border:none; margin-bottom:8px;">📂 短期記憶 (Short-term Memory)
+          </div>
+          <div id="memory-list" style="font-size: 12px; color: #718096; min-height: 60px;">
+            <div style="font-style: italic; opacity: 0.6;">(尚無關鍵記憶)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="character-area">
+        <div class="character" id="character">🤖</div>
+        <div class="status-display">
+          <h3 id="character-name" style="margin-bottom:5px;">智能 NPC</h3>
+          <p id="character-status" style="font-size:18px; font-weight:bold; color:#fff;">等待指令中...</p>
+          <p id="current-emotion" style="margin-top:5px; opacity:0.8;">情緒: 平靜</p>
+        </div>
+
+        <div class="log-area" id="log-area">
+          <div class="log-entry action">系統啟動 - NPC初始化完成</div>
+          <div class="log-entry emotion">情緒狀態: 平靜 (強度: 0.00)</div>
+          <div class="log-entry decision">等待玩家指令...</div>
+        </div>
+      </div>
+
+      <div class="commands-panel">
+        <div class="panel-title">🎮 玩家指令</div>
+        <button class="command-btn" onclick="executeCommand('greet')">👋 打招呼 (Greet)</button>
+        <button class="command-btn" onclick="executeCommand('help')">🤝 請求幫助 (Help)</button>
+        <button class="command-btn" onclick="executeCommand('attack')">⚔️ 發起攻擊 (Attack)</button>
+        <button class="command-btn" onclick="executeCommand('gift')">🎁 贈送禮物 (Gift)</button>
+        <button class="command-btn" onclick="executeCommand('threaten')">😠 威脅恐嚇 (Threaten)</button>
+        <button class="command-btn" onclick="executeCommand('explore')">🗺️ 邀請探索 (Explore)</button>
+        <button class="command-btn" onclick="executeCommand('trade')">💰 商業交易 (Trade)</button>
+        <button class="command-btn" onclick="executeCommand('joke')">😄 說笑話 (Joke)</button>
+        <button class="command-btn" onclick="executeCommand('sad_news')">😢 告知壞消息 (Bad News)</button>
+        <div style="margin-top: 15px; border-top: 1px dashed #e2e8f0; padding-top: 10px;">
+          <button class="command-btn" style="background:#fff5f5; color:#c53030; border-color:#feb2b2;"
+            onclick="executeCommand('reset')">🔄 重置狀態</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="bt-panel">
+      <div class="bt-header">
+        <div class="panel-title" style="border:none; margin:0;">🧭 行為樹決策可視化 (Behavior Tree)</div>
+        <div class="bt-toolbar">
+          <button class="bt-btn" id="btn-relayout">重排版面</button>
+          <button class="bt-btn" id="btn-toggle-label" style="min-width: 130px">顯示：中文描述</button>
+        </div>
+      </div>
+      <div class="bt-wrap">
+        <svg class="bt" id="bt-svg">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6"
+              orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#718096"></path>
+            </marker>
+            <marker id="arrow-active" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6"
+              orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#48bb78"></path>
+            </marker>
+          </defs>
+        </svg>
+        <div class="legend">🟢 執行成功 &nbsp;|&nbsp; 🔴 執行失敗 &nbsp;|&nbsp; ✨ 高亮=決策路徑</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ================== NPC 數據與設定 ================== */
+    let npc = {
+      personality: { openness: .5, conscientiousness: .5, extraversion: .5, agreeableness: .5, neuroticism: .5 },
+      emotions: { joy: 0.0, anger: 0.0, fear: 0.0, sadness: 0.0 },
+      currentEmotion: 'neutral',
+      trust: .5,
+      memories: [] // 新增：記憶儲存陣列
+    };
+    const MAX_LOG = 50;
+
+    const behaviorDatabase = {
+      greet: { baseResponse: "你好！", personalityEffects: { extraversion: { positive: "熱情地打招呼！嘿！", negative: "點頭示意。" }, agreeableness: { positive: "微笑著回應你。", negative: "冷淡地回應。" }, openness: { positive: "好奇地看著你，問你從哪來？", negative: "警惕地保持距離。" } }, emotionImpact: { joy: .2 } },
+      help: { baseResponse: "我來幫你。", personalityEffects: { agreeableness: { positive: "馬上放下手邊的事來幫你！", negative: "嘖，真麻煩..." }, conscientiousness: { positive: "詳細詢問你需要什麼具體幫助。", negative: "隨便幫了一下。" }, extraversion: { positive: "大聲招呼其他人一起來幫忙。", negative: "默默地遞上工具。" } }, emotionImpact: { joy: .1 } },
+      attack: { baseResponse: "有敵意！", personalityEffects: { neuroticism: { positive: "尖叫著後退！", negative: "冷靜地拔出武器。" }, agreeableness: { positive: "試圖讓你冷靜下來！", negative: "既然你想打，那就來吧！" }, conscientiousness: { positive: "分析你的戰鬥架勢。", negative: "慌亂地四處逃竄。" } }, emotionImpact: { anger: .4, fear: .3 } },
+      gift: { baseResponse: "謝謝。", personalityEffects: { agreeableness: { positive: "太感謝了！我會好好珍惜的。", negative: "這東西有什麼企圖？" }, openness: { positive: "這是什麼新奇的東西？真有趣！", negative: "仔細檢查有沒有危險。" }, extraversion: { positive: "開心得跳了起來！", negative: "害羞地收下了。" } }, emotionImpact: { joy: .3 } },
+      threaten: { baseResponse: "感到威脅。", personalityEffects: { neuroticism: { positive: "別殺我！我什麼都聽你的！", negative: "我不受你的威脅。" }, agreeableness: { positive: "有話好說，我們可以談談。", negative: "你找錯人了。" }, conscientiousness: { positive: "評估雙方實力差距。", negative: "嚇得語無倫次。" } }, emotionImpact: { fear: .5, anger: .2 } },
+      explore: { baseResponse: "考慮探索。", personalityEffects: { openness: { positive: "好啊！我一直想去那邊看看！", negative: "外面太危險了吧？" }, conscientiousness: { positive: "等我準備好地圖和物資。", negative: "走吧走吧！直接出發！" }, extraversion: { positive: "我來帶路！", negative: "我跟在你後面就好。" } }, emotionImpact: { joy: .2 } },
+      trade: { baseResponse: "考慮交易。", personalityEffects: { conscientiousness: { positive: "讓我算算這筆交易划不划算...", negative: "好吧，隨便賣給你。" }, agreeableness: { positive: "算你便宜一點吧朋友。", negative: "這價格太低了，免談。" }, openness: { positive: "這東西我沒見過，換了！", negative: "我只收金幣。" } }, emotionImpact: { joy: .1 } },
+      joke: { baseResponse: "聽到笑話。", personalityEffects: { extraversion: { positive: "哈哈哈哈！太好笑了！", negative: "微微一笑。" }, openness: { positive: "這笑話挺有深意的。", negative: "我聽不懂梗在哪。" }, agreeableness: { positive: "雖然不好笑，但還是禮貌地笑了。", negative: "無聊。" } }, emotionImpact: { joy: .3 } },
+      sad_news: { baseResponse: "得知壞消息。", personalityEffects: { neuroticism: { positive: "天啊！怎麼會這樣... (崩潰)", negative: "這就是人生..." }, agreeableness: { positive: "我很遺憾，需要擁抱嗎？", negative: "哦，知道了。" }, extraversion: { positive: "找人傾訴心中的悲傷。", negative: "獨自躲在角落。" } }, emotionImpact: { sadness: .4, fear: .1 } }
+    };
+
+    /* ================== 主要邏輯 ================== */
+
+    function initializeSliders() {
+      const traits = ['openness', 'conscientiousness', 'extraversion', 'agreeableness', 'neuroticism'];
+      traits.forEach(trait => {
+        const slider = document.getElementById(trait);
+        const valueDisplay = document.getElementById(trait + '-value');
+        const sync = (v) => { valueDisplay.textContent = Number(v).toFixed(1); npc.personality[trait] = v; };
+        slider.addEventListener('input', function () {
+          const v = parseFloat(this.value); sync(v);
+          addLogEntry(`人格調整: ${getTraitName(trait)} = ${v.toFixed(1)}`, 'decision');
+        });
+      });
+      updateTrustBar();
+    }
+
+    // 記憶處理系統 
+    function addMemory(type, desc, isNegative) {
+      if (npc.memories.length >= 3) npc.memories.shift();
+      npc.memories.push({ type, desc, isNegative, time: Date.now() });
+      updateMemoryDisplay();
+    }
+
+    function hasMemory(type) {
+      return npc.memories.some(m => m.type === type);
+    }
+
+    function updateMemoryDisplay() {
+      const list = document.getElementById('memory-list');
+      list.innerHTML = '';
+      if (npc.memories.length === 0) {
+        list.innerHTML = '<div style="font-style: italic; opacity: 0.6;">(尚無關鍵記憶)</div>';
+        return;
+      }
+      npc.memories.forEach(m => {
+        const div = document.createElement('div');
+        div.className = `memory-item ${m.isNegative ? 'negative' : 'positive'}`;
+        div.textContent = m.desc;
+        list.appendChild(div);
+      });
+    }
+
+    function executeCommand(command) {
+      if (command === 'reset') { resetNPC(); return; }
+      const behavior = behaviorDatabase[command];
+      if (!behavior) return;
+
+      // 寫入記憶：針對特定事件
+      if (command === 'attack') addMemory('attack', '曾被玩家攻擊', true);
+      if (command === 'gift' && npc.emotions.anger <= 0.5) addMemory('gift', '收過玩家禮物', false);
+      if (command === 'threaten') addMemory('threat', '曾被玩家威脅', true);
+      // 邏輯判斷
+      // 檢查是否記仇：有攻擊記憶 + 神經質高 (>0.6) = 記仇模式
+      const isGrudging = hasMemory('attack') && npc.personality.neuroticism > 0.6;
+      // 檢查是否拒收禮物
+      const isRefusingGift = (command === 'gift' && npc.emotions.anger > 0.5);
+      let response = "";
+      if (isGrudging && command !== 'attack' && command !== 'threaten') {
+        // 【記仇】除了戰鬥指令外，其他互動全部拒絕
+        updateEmotions({ anger: 0.05 });
+        response = "(冷漠地) 我還記得你對我做過什麼...走開。";
+      }
+      else if (isRefusingGift) {
+        // 【憤怒拒收】
+        updateEmotions({ anger: 0.1 });
+        response = "(憤怒地) 我不需要你的垃圾！拿走！";
+      }
+      else {
+        // 【正常互動】
+        updateEmotions(behavior.emotionImpact);
+        response = generatePersonalityResponse(behavior);
+      }
+
+      updateTrust(command);
+      displayResponse(response);
+      addLogEntry(`執行指令: ${getCommandName(command)}`, 'action');
+      addLogEntry(`反應: ${response}`, 'decision');
+
+      lastTreeCmd = command;
+      const tree = buildTreeFor(command);
+      const traversal = [];
+      const result = tree.tick({ npc, command }, traversal);
+      drawBehaviorTree(tree, traversal);
+    }
+
+    function updateEmotions(impact) {
+      const nScore = npc.personality.neuroticism;
+      const sensitivity = 1 + (nScore * 0.5);
+
+      for (const emo in impact) {
+        let finalImpact = impact[emo] * sensitivity;
+        npc.emotions[emo] = Math.min(1, npc.emotions[emo] + finalImpact);
+      }
+
+      if (impact.sadness || impact.anger || impact.fear) { npc.emotions.joy *= 0.5; }
+      if (impact.joy) { npc.emotions.sadness *= 0.5; npc.emotions.anger *= 0.5; npc.emotions.fear *= 0.5; }
+
+      for (const emo in npc.emotions) {
+        if (!impact[emo]) npc.emotions[emo] = Math.max(0, npc.emotions[emo] * 0.9);
+      }
+      updatePrimaryEmotion();
+    }
+
+    function updateTrust(command) {
+      const trustChanges = { greet: .05, help: -.1, attack: -.3, gift: .2, threaten: -.4, explore: .1, trade: .05, joke: .1, sad_news: -.05 };
+      if (Object.prototype.hasOwnProperty.call(trustChanges, command)) {
+        let rawChange = trustChanges[command];
+        const p = npc.personality;
+        if (hasMemory('attack') || hasMemory('threat')) {
+          if (rawChange > 0) rawChange *= 0.5;
+          else rawChange *= 1.5;
+        }
+
+        if (rawChange > 0) rawChange *= (0.5 + p.agreeableness);
+        if (rawChange < 0) rawChange *= (1 + p.neuroticism * 0.5);
+        if (command === 'explore' && p.openness > 0.7) rawChange *= 1.5;
+
+        npc.trust = Math.max(0, Math.min(1, npc.trust + rawChange));
+        updateTrustBar();
+      }
+    }
+
+    /* 自然衰退 (含情緒與記憶) */
+    let decayTimer = null;
+
+    function startEmotionDecay() {
+      if (decayTimer) clearInterval(decayTimer);
+
+      decayTimer = setInterval(() => {
+        const nScore = npc.personality.neuroticism;
+
+        // 情緒衰退
+        const decayRate = 0.01; 
+        let emoChanged = false;
+        for (const emo in npc.emotions) {
+          const before = npc.emotions[emo];
+          npc.emotions[emo] = Math.max(0, npc.emotions[emo] - decayRate);
+          if (Math.abs(npc.emotions[emo] - before) > 0.001) emoChanged = true;
+        }
+        if (emoChanged) updatePrimaryEmotion();
+
+        // 2. 記憶遺忘邏輯
+        // 記憶壽命 = 基礎 10秒 + (神經質 * 20秒)
+        // 神經質 0.0 -> 10秒忘記
+        // 神經質 1.0 -> 30秒忘記
+        const memoryLifeSpan = 10000 + (nScore * 20000);
+        const now = Date.now();
+
+        const originalCount = npc.memories.length;
+        npc.memories = npc.memories.filter(m => (now - m.time) < memoryLifeSpan);
+
+        if (npc.memories.length !== originalCount) {
+          updateMemoryDisplay();
+          addLogEntry("時間流逝，NPC 忘記了一些事...", "decision");
+
+          // 如果因為忘記仇恨而解鎖互動，重新繪製行為樹
+          if (lastTreeCmd) {
+            const tree = buildTreeFor(lastTreeCmd);
+            const traversal = [];
+            tree.tick({ npc, command: lastTreeCmd }, traversal);
+            drawBehaviorTree(tree, traversal);
+          }
+        }
+
+      }, 1000); // 改為每 1000ms (1秒) 執行一次
+    }
+
+    function getTraitName(trait) { return ({ openness: '開放性', conscientiousness: '盡責性', extraversion: '外向性', agreeableness: '宜人性', neuroticism: '神經質' })[trait] || trait; }
+    function getEmotionName(key) { return ({ neutral: '平靜', joy: '愉悅', anger: '憤怒', fear: '恐懼', sadness: '悲傷' })[key] || key; }
+    function getCommandName(cmd) { return ({ greet: '打招呼', help: '請求幫助', attack: '發起攻擊', gift: '贈送禮物', threaten: '威脅恐嚇', explore: '邀請探索', trade: '商業交易', joke: '說笑話', sad_news: '告知壞消息' })[cmd] || cmd; }
+
+    function generatePersonalityResponse(behavior) {
+      const parts = [];
+      for (const trait in behavior.personalityEffects) {
+        const v = npc.personality[trait];
+        const eff = behavior.personalityEffects[trait];
+        if (v > 0.6 && eff.positive) parts.push(eff.positive);
+        else if (v < 0.4 && eff.negative) parts.push(eff.negative);
+      }
+      let base = behavior.baseResponse;
+      if (parts.length > 0) base = parts.join(" 且 ");
+      const strength = getCurrentEmotionStrength();
+      if (strength > 0.3) base = applyEmotionalModifier(base);
+      return base;
+    }
+
+    function updatePrimaryEmotion() {
+      let maxKey = 'neutral', maxVal = 0;
+      for (const emo in npc.emotions) { if (npc.emotions[emo] > maxVal) { maxVal = npc.emotions[emo]; maxKey = emo; } }
+      if (maxVal < 0.2) maxKey = 'neutral';
+      npc.currentEmotion = maxKey; updateCharacterDisplay();
+      addLogEntry(`情緒變更: ${getEmotionName(maxKey)} (${maxVal.toFixed(2)})`, 'emotion');
+    }
+
+    function updateCharacterDisplay() {
+      const character = document.getElementById('character');
+      const emotionDisplay = document.getElementById('current-emotion');
+      const statusDisplay = document.getElementById('character-status');
+      character.className = 'character';
+      switch (npc.currentEmotion) {
+        case 'joy': character.classList.add('happy'); character.textContent = '😊'; break;
+        case 'anger': character.classList.add('angry'); character.textContent = '😠'; break;
+        case 'sadness': character.classList.add('sad'); character.textContent = '😢'; break;
+        case 'fear': character.classList.add('fearful'); character.textContent = '😨'; break;
+        default: character.textContent = '🤖';
+      }
+      emotionDisplay.textContent = `情緒: ${getEmotionName(npc.currentEmotion)}`;
+    }
+
+    function updateTrustBar() {
+      document.getElementById('trust-bar').style.width = (npc.trust * 100) + '%';
+      document.getElementById('trust-value').textContent = npc.trust.toFixed(2);
+    }
+
+    function displayResponse(text) {
+      const status = document.getElementById('character-status');
+      status.textContent = text;
+      status.style.animation = 'none';
+      status.offsetHeight;
+      status.style.animation = 'slideIn 0.3s ease';
+    }
+
+    function addLogEntry(msg, type = 'action') {
+      const log = document.getElementById('log-area');
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      const ts = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      entry.textContent = `[${ts}] ${msg}`;
+      log.appendChild(entry);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function resetNPC() {
+      npc.emotions = { joy: 0, anger: 0, fear: 0, sadness: 0 };
+      npc.memories = []; // 清空記憶
+      npc.currentEmotion = 'neutral';
+      npc.trust = .5;
+      updateMemoryDisplay();
+      updateTrustBar(); updateCharacterDisplay();
+      addLogEntry('NPC狀態已重置 (含記憶)', 'action');
+      document.getElementById('character-status').textContent = '已重置，等待新指令...';
+      const initTree = new Selector('Root');
+      drawBehaviorTree(initTree, []);
+    }
+
+    function getCurrentEmotionStrength() { return npc.emotions[npc.currentEmotion] || 0; }
+
+    function applyEmotionalModifier(text) {
+      const map = { joy: "(開心地) ", anger: "(憤怒地) ", sadness: "(悲傷地) ", fear: "(顫抖地) " };
+      const p = map[npc.currentEmotion];
+      return p ? (p + text) : text;
+    }
+
+    /* ================== 行為樹核心 ================== */
+    const BTStatus = { SUCCESS: 'SUCCESS', FAILURE: 'FAILURE', RUNNING: 'RUNNING' };
+
+    class BTNode {
+      constructor(type, label = '') { this.type = type; this.label = label; this.children = []; this.parent = null; this.x = 0; this.y = 0; this.id = Math.random().toString(36).slice(2, 9); }
+      add(child) { child.parent = this; this.children.push(child); return this; }
+      tick(ctx, trace) { trace.push({ id: this.id, type: this.type }); return BTStatus.SUCCESS; }
+    }
+    class Selector extends BTNode {
+      constructor(label = 'Selector') { super('selector', label); }
+      tick(ctx, trace) {
+        trace.push({ id: this.id, type: this.type });
+        for (const c of this.children) {
+          const r = c.tick(ctx, trace);
+          if (r === BTStatus.SUCCESS || r === BTStatus.RUNNING) return r;
+        }
+        return BTStatus.FAILURE;
+      }
+    }
+    class Sequence extends BTNode {
+      constructor(label = 'Sequence') { super('sequence', label); }
+      tick(ctx, trace) {
+        trace.push({ id: this.id, type: this.type });
+        for (const c of this.children) {
+          const r = c.tick(ctx, trace);
+          if (r === BTStatus.FAILURE || r === BTStatus.RUNNING) return r;
+        }
+        return BTStatus.SUCCESS;
+      }
+    }
+    class Condition extends BTNode {
+      constructor(label, fn) { super('condition', label); this.fn = fn; }
+      tick(ctx, trace) {
+        trace.push({ id: this.id, type: this.type });
+        return this.fn(ctx) ? BTStatus.SUCCESS : BTStatus.FAILURE;
+      }
+    }
+    class Action extends BTNode {
+      constructor(label, fn) { super('action', label); this.fn = fn; }
+      tick(ctx, trace) {
+        trace.push({ id: this.id, type: this.type });
+        return this.fn ? (this.fn(ctx) || BTStatus.SUCCESS) : BTStatus.SUCCESS;
+      }
+    }
+
+    function buildTreeFor(command) {
+      const { personality: p, emotions: e, trust } = npc;
+      const root = new Selector('Root');
+
+      // 0) 記憶與記仇系統 (新增的最高優先級)
+      // 如果有攻擊記憶 且 神經質高 -> 拒絕互動
+      const branchGrudge = new Sequence('記仇系統')
+        .add(new Condition('是否有仇?', () => hasMemory('attack')))
+        .add(new Condition('神經質高(記仇)?', () => p.neuroticism > 0.6))
+        .add(new Condition('非戰鬥指令?', ({ command }) => command !== 'attack' && command !== 'threaten'))
+        .add(new Action('冷漠拒絕互動'));
+
+      // 1) 生存與安全
+      const branchSafety = new Sequence('生存威脅檢測')
+        .add(new Condition('是否受威脅?', ({ command }) => command === 'attack' || command === 'threaten' || e.fear > 0.45))
+        .add(new Selector('防禦策略')
+          .add(new Sequence('和平談判')
+            .add(new Condition('高宜人/盡責?', () => p.agreeableness > 0.6 || p.conscientiousness > 0.6))
+            .add(new Action('安撫與談判')))
+          .add(new Sequence('逃跑/求援')
+            .add(new Condition('高神經質或不信任?', () => p.neuroticism > 0.6 || trust < 0.3))
+            .add(new Action('撤退與求救')))
+          .add(new Action('準備反擊')));
+
+      // 2) 社交互動
+      const branchSocial = new Selector('社交互動系統')
+        .add(new Sequence('接受禮物處理')
+          .add(new Condition('收到禮物?', ({ command }) => command === 'gift'))
+          .add(new Selector('禮物反應決策')
+            .add(new Sequence('憤怒拒收')
+              .add(new Condition('極度憤怒?', () => e.anger > 0.5))
+              .add(new Action('把禮物扔回去')))
+            .add(new Sequence('懷疑動機')
+              .add(new Condition('神經質高?', () => p.neuroticism > 0.7))
+              .add(new Action('檢查禮物')))
+            .add(new Action('開心接受'))))
+        .add(new Sequence('一般寒暄')
+          .add(new Condition('打招呼/玩笑?', ({ command }) => command === 'greet' || command === 'joke'))
+          .add(new Action('回應對話')))
+        .add(new Sequence('商業交易')
+          .add(new Condition('交易請求?', ({ command }) => command === 'trade'))
+          .add(new Condition('盡責性合格?', () => p.conscientiousness > 0.3))
+          .add(new Action('評估價值')))
+        .add(new Sequence('探索邀請')
+          .add(new Condition('探索請求?', ({ command }) => command === 'explore'))
+          .add(new Condition('開放性高?', () => p.openness > 0.4 || e.joy > 0.3))
+          .add(new Action('同意出發')));
+
+      // 3) 情感支援
+      const branchEmpathy = new Selector('情感響應')
+        .add(new Sequence('回應求助')
+          .add(new Condition('有人求助?', ({ command }) => command === 'help'))
+          .add(new Condition('非冷漠?', () => p.agreeableness > 0.3))
+          .add(new Action('提供協助')))
+        .add(new Sequence('處理壞消息')
+          .add(new Condition('收到壞消息?', ({ command }) => command === 'sad_news'))
+          .add(new Action('表達同情')));
+
+      const fallback = new Action('閒置/觀察');
+
+      // 將記仇分支加入根節點的最前面
+      root.add(branchGrudge).add(branchSafety).add(branchSocial).add(branchEmpathy).add(fallback);
+      return root;
+    }
+
+    /* ================== 繪製與佈局 (維持原樣) ================== */
+    const svg = document.getElementById('bt-svg');
+    let SHOW_EN = false;
+    let lastTreeCmd = null;
+
+    function drawBehaviorTree(root, traversal) {
+      const defs = svg.querySelector('defs');
+      svg.innerHTML = ''; if (defs) svg.appendChild(defs);
+
+      const levels = {}; const nodes = [];
+      (function dfs(node, depth = 0) {
+        if (!levels[depth]) levels[depth] = [];
+        node.depth = depth; levels[depth].push(node); nodes.push(node);
+        node.children.forEach(c => dfs(c, depth + 1));
+      })(root);
+
+      const levelCount = Object.keys(levels).length;
+      let maxNodesInLevel = 0;
+      for (let l in levels) maxNodesInLevel = Math.max(maxNodesInLevel, levels[l].length);
+
+      const nodeWidth = 120, nodeHeight = 40, xGap = 180, yGap = 80;
+      const requiredWidth = Math.max(800, 100 + levelCount * xGap);
+      const requiredHeight = Math.max(500, 100 + maxNodesInLevel * yGap);
+
+      svg.setAttribute('width', requiredWidth);
+      svg.setAttribute('height', requiredHeight);
+
+      Object.keys(levels).forEach(d => {
+        const nodesAtLevel = levels[d];
+        const totalH = nodesAtLevel.length * yGap;
+        const startY = (requiredHeight - totalH) / 2;
+        nodesAtLevel.forEach((n, i) => {
+          if (!n._fixed) { n.x = 50 + d * xGap; n.y = startY + i * yGap; }
+        });
+      });
+
+      nodes.forEach(n => {
+        n.children.forEach(c => {
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          path.setAttribute('class', 'link');
+          path.setAttribute('d', makeLinkPath(n.x + nodeWidth, n.y + nodeHeight / 2, c.x, c.y + nodeHeight / 2));
+          svg.appendChild(path);
+          if (!n._links) n._links = [];
+          n._links.push({ to: c, el: path });
+        });
+      });
+
+      const visited = new Set(traversal.map(t => t.id));
+      nodes.forEach(n => {
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.setAttribute('class', `node ${n.type}`);
+        g.setAttribute('transform', `translate(${n.x},${n.y})`);
+
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('width', nodeWidth); rect.setAttribute('height', nodeHeight);
+        g.appendChild(rect);
+
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', nodeWidth / 2); text.setAttribute('y', nodeHeight / 2 + 4); text.setAttribute('text-anchor', 'middle');
+
+        const typeLabelMap = { selector: 'Selector', sequence: 'Sequence', condition: 'Condition', action: 'Action' };
+        const cnLabelMap = { selector: '選擇器 (?)', sequence: '序列 (→)', condition: '條件', action: '行動' };
+        let labelText = SHOW_EN ? typeLabelMap[n.type] : (n.label || cnLabelMap[n.type]);
+        if (labelText.length > 8 && !n.label) labelText = labelText.substring(0, 8) + '..';
+        text.textContent = labelText;
+        g.appendChild(text);
+
+        if (visited.has(n.id)) {
+          g.classList.add('success');
+          if (n.parent && visited.has(n.parent.id)) {
+            const linkObj = n.parent._links.find(l => l.to === n);
+            if (linkObj) { linkObj.el.classList.add('active'); linkObj.el.setAttribute('marker-end', 'url(#arrow-active)'); }
+          }
+        }
+        enableDrag(g, n, nodeWidth, nodeHeight);
+        svg.appendChild(g);
+      });
+    }
+
+    function makeLinkPath(x1, y1, x2, y2) { const mx = (x1 + x2) / 2; return `M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`; }
+
+    function enableDrag(g, node, w, h) {
+      let start = null;
+      const onDown = (e) => {
+        e.preventDefault();
+        const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+        const svgP = pt.matrixTransform(svg.getScreenCTM().inverse());
+        start = { x: svgP.x, y: svgP.y, nx: node.x, ny: node.y };
+        node._fixed = true;
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onUp, { once: true });
+        g.style.cursor = 'grabbing';
+      };
+      const onMove = (e) => {
+        if (!start) return;
+        const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+        const svgP = pt.matrixTransform(svg.getScreenCTM().inverse());
+        node.x = start.nx + (svgP.x - start.x); node.y = start.ny + (svgP.y - start.y);
+        g.setAttribute('transform', `translate(${node.x},${node.y})`);
+        if (node.parent && node.parent._links) {
+          const link = node.parent._links.find(l => l.to === node);
+          if (link) link.el.setAttribute('d', makeLinkPath(node.parent.x + w, node.parent.y + h / 2, node.x, node.y + h / 2));
+        }
+        if (node._links) {
+          node._links.forEach(({ to, el }) => { el.setAttribute('d', makeLinkPath(node.x + w, node.y + h / 2, to.x, to.y + h / 2)); });
+        }
+      };
+      const onUp = () => { start = null; window.removeEventListener('mousemove', onMove); g.style.cursor = 'grab'; };
+      g.addEventListener('mousedown', onDown); g.style.cursor = 'grab';
+    }
+
+    document.getElementById('btn-relayout').addEventListener('click', () => {
+      if (lastTreeCmd) {
+        const tree = buildTreeFor(lastTreeCmd);
+        const traversal = []; tree.tick({ npc, command: lastTreeCmd }, traversal);
+        drawBehaviorTree(tree, traversal);
+      }
+    });
+
+    document.getElementById('btn-toggle-label').addEventListener('click', function () {
+      SHOW_EN = !SHOW_EN;
+      this.textContent = SHOW_EN ? "顯示：英文型別" : "顯示：中文描述";
+      if (lastTreeCmd) {
+        const tree = buildTreeFor(lastTreeCmd);
+        const traversal = []; tree.tick({ npc, command: lastTreeCmd }, traversal);
+        drawBehaviorTree(tree, traversal);
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeSliders();
+      updateCharacterDisplay();
+      startEmotionDecay();
+      const initTree = new Selector('Root');
+      drawBehaviorTree(initTree, []);
+    });
+  </script>
+</body>
+
+</html>

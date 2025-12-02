@@ -1,0 +1,14 @@
+# 不要被版本控制的資料夾
+node_modules/
+dist/
+temp/
+.cache/
+
+# 作業系統產生的
+.DS_Store
+Thumbs.db
+
+# log / 其他暫存檔
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

@@ -1,0 +1,17 @@
+{
+  "name": "aaryn961225.github.io",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^7.1.0",
+    "cannon-es": "^0.20.0",
+    "three": "^0.181.2"
+  }
+}
