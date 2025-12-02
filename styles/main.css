@@ -1,0 +1,299 @@
+/* 基本設定 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  color: #111827;
+  background: #f3f4f6;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.container {
+  width: 100%;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Header */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(243, 244, 246, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.logo-mark {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #4f46e5, #06b6d4);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 14px;
+}
+
+.logo-text {
+  font-size: 14px;
+  color: #374151;
+}
+
+.nav {
+  display: flex;
+  gap: 16px;
+  font-size: 14px;
+}
+
+.nav a {
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: #4b5563;
+}
+
+.nav a:hover {
+  background: #e5e7eb;
+}
+
+/* Hero */
+.hero {
+  padding: 72px 0 40px;
+}
+
+.hero-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.hero-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #e0f2fe;
+  color: #0369a1;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.hero h1 {
+  margin: 0 0 12px;
+  font-size: 32px;
+  line-height: 1.3;
+}
+
+.hero-sub {
+  margin: 0 0 20px;
+  color: #4b5563;
+  max-width: 640px;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 14px;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.btn.primary {
+  background: linear-gradient(135deg, #4f46e5, #06b6d4);
+  color: #fff;
+}
+
+.btn.primary:hover {
+  filter: brightness(1.05);
+}
+
+.btn.ghost {
+  background: transparent;
+  border-color: #9ca3af;
+  color: #374151;
+}
+
+.btn.ghost:hover {
+  background: #e5e7eb;
+}
+
+/* Sections */
+.section {
+  padding: 48px 0;
+}
+
+.section-alt {
+  background: #ffffff;
+}
+
+.section-title {
+  font-size: 22px;
+  margin: 0 0 16px;
+}
+
+/* Cases */
+.case-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.case-card {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 18px 16px 20px;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.case-card h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.case-tag {
+  font-size: 11px;
+  color: #0369a1;
+  background: #e0f2fe;
+  border-radius: 999px;
+  display: inline-block;
+  padding: 2px 8px;
+}
+
+.case-desc {
+  margin: 0;
+  font-size: 13px;
+  color: #4b5563;
+}
+
+.case-link {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #4f46e5;
+}
+
+/* Skills */
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.skill-block {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+}
+
+.skill-block h3 {
+  margin-top: 0;
+  font-size: 15px;
+}
+
+.skill-block ul {
+  padding-left: 18px;
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: #4b5563;
+}
+
+/* Footer */
+.site-footer {
+  padding: 20px 0 28px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 12px;
+  color: #6b7280;
+  background: #f9fafb;
+}
+
+/* Case detail page共用樣式 */
+.case-layout {
+  padding: 40px 0 56px;
+}
+
+.case-layout .back-link {
+  font-size: 13px;
+  color: #4b5563;
+}
+
+.case-layout h1 {
+  margin-top: 12px;
+  font-size: 26px;
+}
+
+.case-meta {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 16px;
+}
+
+.case-section-title {
+  margin-top: 24px;
+  font-size: 18px;
+}
+
+/* RWD */
+@media (max-width: 860px) {
+  .case-list,
+  .skills-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    padding-top: 56px;
+  }
+}
+
+@media (max-width: 640px) {
+  .header-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    height: auto;
+    padding: 8px 0 10px;
+  }
+
+  .nav {
+    font-size: 13px;
+  }
+
+  .hero h1 {
+    font-size: 26px;
+  }
+}
