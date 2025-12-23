@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Case – 後台 Dashboard 系統重構</title>
+    <link rel="stylesheet" href="../styles/main.css" />
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="container header-inner">
+            <div class="logo">
+                <span class="logo-mark">JH</span>
+                <span class="logo-text">Jinghuei / UI·UX</span>
+            </div>
+        </div>
+    </header>
+    <main class="case-layout">
+        <div class="container">
+            <a href="../index.html" class="back-link">← Back to Home</a>
+            <h1>Interaction Lab｜設計系統工具庫</h1>
+            <p class="case-meta">這是一個持續更新的實驗室，存放我為了優化開發流程、提升介面質感而製作的各種 UI 元件與參數化工具。</p>
+
+            <section class="tool-item">
+                <h2 class="case-section-title">01. SVG 文字軌跡路徑配置器</h2>
+                <div class="iframe-container">
+                    <iframe src="./tools/svg_Text.html" loading="lazy"></iframe>
+                </div>
+                <div class="tool-desc">
+                    <p><strong>問題點：</strong> 傳統 Logo 動效調整需要反覆修改 CSS/JS 代碼。</p>
+                    <p><strong>解決方案：</strong> 建立視覺化控制面板，包含模式切換、速度與光點半徑控制。</p>
+                </div>
+            </section>
+
+            <hr class="divider">
+
+            <section class="tool-item">
+                <h2 class="case-section-title">02. [即將上線：例如色彩系統生成器/彈窗邏輯模擬]</h2>
+                <div class="placeholder-box">
+                    Coming Soon...
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>© <span id="year"></span> Jinghuei Ruan. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="../src/main.js" defer></script>
+</body>
+
+</html>
