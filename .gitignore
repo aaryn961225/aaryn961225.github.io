@@ -1,8 +1,8 @@
 # 不要被版本控制的資料夾
-# node_modules/
-# dist/
-# temp/
-# .cache/
+node_modules/
+dist/
+temp/
+.cache/
 
 # 作業系統產生的
 .DS_Store
